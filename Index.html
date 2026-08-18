@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Termo de Compromisso de Estágio</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f2f4f7;
+      color: #222;
+    }
+
+    .topo {
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 18px 25px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo-site {
+      width: 300px;
+      max-width: 45vw;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .titulo-topo h1 {
+      margin: 0;
+      font-size: 21px;
+      color: #1b1b1b;
+    }
+
+    .titulo-topo p {
+      margin: 5px 0 0;
+      color: #666;
+      font-size: 13px;
+    }
+
+    .container {
+      max-width: 1050px;
+      margin: 30px auto;
+      padding: 0 18px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.07);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e6e6e6;
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .campo {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .campo.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 13px;
+      color: #333;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #cfcfcf;
+      border-radius: 7px;
+      font-size: 14px;
+      outline: none;
+      transition: .2s;
+      background: #fff;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #14783f;
+      box-shadow: 0 0 0 3px rgba(20,120,63,.10);
+    }
+
+    textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+
+    .obrigatorio { color: #d22; }
+
+    .idade {
+      background: #f7faf8;
+      border: 1px solid #d9e9df;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+
+    .idade label {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 25px;
+    }
+
+    .radio {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: normal;
+    }
+
+    .radio input { width: auto; }
+
+    #responsavel { display: none; }
+
+    .acoes {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 13px 25px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-gerar {
+      background: #16763f;
+      color: #fff;
+    }
+
+    .btn-gerar:hover { background: #105c30; }
+
+    .btn-limpar {
+      background: #e8e8e8;
+      color: #333;
+    }
+
+    .mensagem {
+      display: none;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    .sucesso {
+      display: block;
+      background: #e8f7ed;
+      color: #176b38;
+      border: 1px solid #bce5ca;
+    }
+
+    .erro {
+      display: block;
+      background: #fff0f0;
+      color: #a21d1d;
+      border: 1px solid #efbcbc;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 15px;
+      text-align: center;
+      color: #555;
+    }
+
+    @media(max-width: 750px) {
+      .topo {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .logo-site {
+        width: 100%;
+        max-width: 430px;
+      }
+
+      .grid, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .campo.full { grid-column: auto; }
+
+      .acoes { flex-direction: column; }
+
+      button { width: 100%; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topo">
+    <img id="logoSite" class="logo-site" alt="IFRS - Campus Alvorada" src="data:image/png;base64,<?= LOGO_BASE64 ?>">
+    <div class="titulo-topo">
+      <h1>Gerador de Termo de Compromisso de Estágio</h1>
+      <p>Instituto Federal de Educação, Ciência e Tecnologia do Rio Grande do Sul – Campus Alvorada</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div class="card">
+      <h2>Dados do IFRS – Campus Alvorada</h2>
+
+      <div class="grid">
+        <div class="campo">
+          <label>CNPJ</label>
+          <input value="10.637.926/0016-22" readonly>
+        </div>
+
+        <div class="campo">
+          <label>Telefone</label>
+          <input value="(51) 3483-9104" readonly>
+        </div>
+
+        <div class="campo full">
+          <label>Endereço</label>
+          <input value="Rua Professor Darcy Ribeiro, 121 - CEP 94.834-413 - Campos Verdes - Alvorada/RS" readonly>
+        </div>
+
+        <div class="campo">
+          <label>Representante Legal</label>
+          <input value="Ademilde Irene Petzold Prado" readonly>
+        </div>
+
+        <div class="campo">
+          <label>Cargo</label>
+          <input value="Diretora Geral" readonly>
+        </div>
+
+        <div class="campo">
+          <label>Coordenadora de Estágios</label>
+          <input value="Marlise Paz dos Santos" readonly>
+        </div>
+
+        <div class="campo">
+          <label>E-mail</label>
+          <input value="estagios@alvorada.ifrs.edu.br" readonly>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Dados da Concedente</h2>
+
+      <div class="grid">
+        <div class="campo">
+          <label>Razão Social <span class="obrigatorio">*</span></label>
+          <input id="razaoSocial" required>
+        </div>
+
+        <div class="campo">
+          <label>CNPJ <span class="obrigatorio">*</span></label>
+          <input id="cnpjConcedente" oninput="mascaraCNPJ(this)" maxlength="18" required>
+        </div>
+
+        <div class="campo">
+          <label>Ramo de Atividade</label>
+          <input id="ramoAtividade">
+        </div>
+
+        <div class="campo">
+          <label>Telefone</label>
+          <input id="telefoneConcedente" oninput="mascaraTelefone(this)" maxlength="15">
+        </div>
+
+        <div class="campo full">
+          <label>Endereço <span class="obrigatorio">*</span></label>
+          <input id="enderecoConcedente" required>
+        </div>
+
+        <div class="campo">
+          <label>E-mail</label>
+          <input id="emailConcedente" type="email">
+        </div>
+
+        <div class="campo">
+          <label>Representante Legal</label>
+          <input id="represLegal">
+        </div>
+
+        <div class="campo">
+          <label>Cargo do Representante</label>
+          <input id="cargoRepres">
+        </div>
+
+        <div class="campo">
+          <label>Supervisor do Estágio</label>
+          <input id="supervisorNome">
+        </div>
+
+        <div class="campo">
+          <label>Cargo do Supervisor</label>
+          <input id="supervisorCargo">
+        </div>
+
+        <div class="campo">
+          <label>Formação do Supervisor</label>
+          <input id="supervisorFormacao">
+        </div>
+
+        <div class="campo">
+          <label>Telefone do Supervisor</label>
+          <input id="supervisorTelefone" oninput="mascaraTelefone(this)" maxlength="15">
+        </div>
+
+        <div class="campo">
+          <label>E-mail do Supervisor</label>
+          <input id="supervisorEmail" type="email">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Dados do Estagiário</h2>
+
+      <div class="grid">
+        <div class="campo full">
+          <label>Nome completo <span class="obrigatorio">*</span></label>
+          <input id="nome" required>
+        </div>
+
+        <div class="campo">
+          <label>RG <span class="obrigatorio">*</span></label>
+          <input id="rg" required>
+        </div>
+
+        <div class="campo">
+          <label>Órgão Expedidor</label>
+          <input id="orgaoExpedidor">
+        </div>
+
+        <div class="campo">
+          <label>CPF <span class="obrigatorio">*</span></label>
+          <input id="cpf" maxlength="14" oninput="mascaraCPF(this)" required>
+        </div>
+
+        <div class="campo">
+          <label>Data de nascimento <span class="obrigatorio">*</span></label>
+          <input id="dataNascimento" type="date" required>
+        </div>
+
+        <div class="campo full">
+          <label>Endereço <span class="obrigatorio">*</span></label>
+          <input id="enderecoEstagiario" required>
+        </div>
+
+        <div class="campo">
+          <label>Bairro</label>
+          <input id="bairro">
+        </div>
+
+        <div class="campo">
+          <label>CEP</label>
+          <input id="cep" maxlength="9" oninput="mascaraCEP(this)">
+        </div>
+
+        <div class="campo">
+          <label>Cidade</label>
+          <input id="cidade" value="Alvorada">
+        </div>
+
+        <div class="campo">
+          <label>Estado</label>
+          <select id="estado">
+            <option value="RS">Rio Grande do Sul</option>
+            <option value="SC">Santa Catarina</option>
+            <option value="PR">Paraná</option>
+            <option value="SP">São Paulo</option>
+            <option value="RJ">Rio de Janeiro</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label>Telefone</label>
+          <input id="telefoneEstagiario" oninput="mascaraTelefone(this)" maxlength="15">
+        </div>
+
+        <div class="campo">
+          <label>Celular</label>
+          <input id="celular" oninput="mascaraTelefone(this)" maxlength="15">
+        </div>
+
+        <div class="campo">
+          <label>E-mail <span class="obrigatorio">*</span></label>
+          <input id="email" type="email" required>
+        </div>
+
+        <div class="campo">
+          <label>Curso</label>
+          <input id="curso">
+        </div>
+      </div>
+
+      <div class="idade">
+        <label>O estagiário possui 18 anos ou mais? <span class="obrigatorio">*</span></label>
+
+        <div class="radio-group">
+          <label class="radio">
+            <input type="radio" name="maiorDeIdade" value="sim" checked onchange="mostrarResponsavel()">
+            Sim
+          </label>
+
+          <label class="radio">
+            <input type="radio" name="maiorDeIdade" value="nao" onchange="mostrarResponsavel()">
+            Não
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="responsavel">
+      <h2>Representante ou Assistente Legal</h2>
+
+      <div class="grid">
+        <div class="campo full">
+          <label>Nome completo <span class="obrigatorio">*</span></label>
+          <input id="responsavelNome">
+        </div>
+
+        <div class="campo">
+          <label>CPF</label>
+          <input id="responsavelCpf" maxlength="14" oninput="mascaraCPF(this)">
+        </div>
+
+        <div class="campo">
+          <label>RG</label>
+          <input id="responsavelRg">
+        </div>
+
+        <div class="campo">
+          <label>Telefone</label>
+          <input id="responsavelTelefone" oninput="mascaraTelefone(this)" maxlength="15">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Condições do Estágio</h2>
+
+      <div class="grid-3">
+        <div class="campo">
+          <label>Data de início <span class="obrigatorio">*</span></label>
+          <input id="dataInicio" type="date" required>
+        </div>
+
+        <div class="campo">
+          <label>Data de término <span class="obrigatorio">*</span></label>
+          <input id="dataFim" type="date" required>
+        </div>
+
+        <div class="campo">
+          <label>Horas semanais <span class="obrigatorio">*</span></label>
+          <input id="horasSemanais" type="number" min="1" required>
+        </div>
+
+        <div class="campo">
+          <label>Horário inicial <span class="obrigatorio">*</span></label>
+          <input id="horarioInicio" type="time" required>
+        </div>
+
+        <div class="campo">
+          <label>Horário final <span class="obrigatorio">*</span></label>
+          <input id="horarioFim" type="time" required>
+        </div>
+
+        <div class="campo">
+          <label>Bolsa auxílio</label>
+          <input id="bolsa" placeholder="Ex.: 800,00">
+        </div>
+
+        <div class="campo full">
+          <label>Área</label>
+          <input id="area">
+        </div>
+
+        <div class="campo full">
+          <label>Benefícios</label>
+          <input id="beneficios" placeholder="Ex.: vale-transporte, alimentação...">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Atividades a serem desenvolvidas</h2>
+
+      <div class="campo">
+        <label>Descreva as atividades <span class="obrigatorio">*</span></label>
+        <textarea id="atividades" required placeholder="Digite as atividades que serão desenvolvidas durante o estágio..."></textarea>
+      </div>
+    </div>
+
+    <div class="acoes">
+      <button class="btn-limpar" type="button" onclick="limparFormulario()">Limpar</button>
+      <button class="btn-gerar" type="button" onclick="gerar()">Gerar Termo</button>
+    </div>
+
+    <div id="loading" class="loading">Gerando o Termo de Compromisso...</div>
+    <div id="mensagem" class="mensagem"></div>
+  </div>
+
+  <script>
+    /*
+     * A mesma logo incorporada no Code.gs é enviada para esta página
+     * pelo HtmlService. Não é necessário hospedar a imagem no Drive.
+     */
+
+    function mascaraCPF(input) {
+      let v = input.value.replace(/\D/g, '').substring(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      input.value = v;
+    }
+
+    function mascaraCNPJ(input) {
+      let v = input.value.replace(/\D/g, '').substring(0, 14);
+      v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+      v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      v = v.replace(/(\d{4})(\d)/, '$1-$2');
+      input.value = v;
+    }
+
+    function mascaraCEP(input) {
+      let v = input.value.replace(/\D/g, '').substring(0, 8);
+      v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+      input.value = v;
+    }
+
+    function mascaraTelefone(input) {
+      let v = input.value.replace(/\D/g, '').substring(0, 11);
+
+      if (v.length <= 10) {
+        v = v.replace(/^(\d{2})(\d)/, '($1) $2');
+        v = v.replace(/(\d{4})(\d)/, '$1-$2');
+      } else {
+        v = v.replace(/^(\d{2})(\d)/, '($1) $2');
+        v = v.replace(/(\d{5})(\d)/, '$1-$2');
+      }
+
+      input.value = v;
+    }
+
+    function mostrarResponsavel() {
+      const selecionado = document.querySelector('input[name="maiorDeIdade"]:checked').value;
+      const div = document.getElementById('responsavel');
+      const nome = document.getElementById('responsavelNome');
+
+      if (selecionado === 'nao') {
+        div.style.display = 'block';
+        nome.required = true;
+      } else {
+        div.style.display = 'none';
+        nome.required = false;
+        nome.value = '';
+        document.getElementById('responsavelCpf').value = '';
+        document.getElementById('responsavelRg').value = '';
+        document.getElementById('responsavelTelefone').value = '';
+      }
+    }
+
+    function valor(id) {
+      const elemento = document.getElementById(id);
+      return elemento ? elemento.value.trim() : '';
+    }
+
+    function gerar() {
+      const obrigatorios = [
+        'razaoSocial',
+        'cnpjConcedente',
+        'enderecoConcedente',
+        'nome',
+        'rg',
+        'cpf',
+        'dataNascimento',
+        'enderecoEstagiario',
+        'email',
+        'dataInicio',
+        'dataFim',
+        'horarioInicio',
+        'horarioFim',
+        'horasSemanais',
+        'atividades'
+      ];
+
+      for (let i = 0; i < obrigatorios.length; i++) {
+        const campo = document.getElementById(obrigatorios[i]);
+
+        if (!campo.value.trim()) {
+          campo.focus();
+          mostrarErro('Preencha todos os campos obrigatórios.');
+          return;
+        }
+      }
+
+      if (valor('dataInicio') > valor('dataFim')) {
+        mostrarErro('A data de término não pode ser anterior à data de início.');
+        return;
+      }
+
+      const maiorDeIdade = document.querySelector(
+        'input[name="maiorDeIdade"]:checked'
+      ).value;
+
+      if (maiorDeIdade === 'nao' && !valor('responsavelNome')) {
+        document.getElementById('responsavelNome').focus();
+        mostrarErro('Preencha o nome do responsável ou assistente legal.');
+        return;
+      }
+
+      const dados = {
+        razaoSocial: valor('razaoSocial'),
+        cnpjConcedente: valor('cnpjConcedente'),
+        ramoAtividade: valor('ramoAtividade'),
+        enderecoConcedente: valor('enderecoConcedente'),
+        telefoneConcedente: valor('telefoneConcedente'),
+        emailConcedente: valor('emailConcedente'),
+        represLegal: valor('represLegal'),
+        cargoRepres: valor('cargoRepres'),
+        supervisorNome: valor('supervisorNome'),
+        supervisorCargo: valor('supervisorCargo'),
+        supervisorFormacao: valor('supervisorFormacao'),
+        supervisorTelefone: valor('supervisorTelefone'),
+        supervisorEmail: valor('supervisorEmail'),
+
+        nome: valor('nome'),
+        rg: valor('rg'),
+        orgaoExpedidor: valor('orgaoExpedidor'),
+        cpf: valor('cpf'),
+        dataNascimento: valor('dataNascimento'),
+        enderecoEstagiario: valor('enderecoEstagiario'),
+        bairro: valor('bairro'),
+        cep: valor('cep'),
+        cidade: valor('cidade'),
+        estado: valor('estado'),
+        telefoneEstagiario: valor('telefoneEstagiario'),
+        celular: valor('celular'),
+        email: valor('email'),
+        curso: valor('curso'),
+
+        maiorDeIdade: maiorDeIdade,
+
+        responsavelNome: valor('responsavelNome'),
+        responsavelCpf: valor('responsavelCpf'),
+        responsavelRg: valor('responsavelRg'),
+        responsavelTelefone: valor('responsavelTelefone'),
+
+        dataInicio: valor('dataInicio'),
+        dataFim: valor('dataFim'),
+        horarioInicio: valor('horarioInicio'),
+        horarioFim: valor('horarioFim'),
+        horasSemanais: valor('horasSemanais'),
+        area: valor('area'),
+        bolsa: valor('bolsa'),
+        beneficios: valor('beneficios'),
+        atividades: valor('atividades')
+      };
+
+      document.getElementById('loading').style.display = 'block';
+      document.querySelector('.btn-gerar').disabled = true;
+      limparMensagem();
+
+      google.script.run
+        .withSuccessHandler(function(resultado) {
+          document.getElementById('loading').style.display = 'none';
+          document.querySelector('.btn-gerar').disabled = false;
+
+          mostrarSucesso(
+            'Termo gerado com sucesso!<br><br>' +
+            '<a href="' + resultado.url + '" target="_blank">' +
+            'Abrir documento no Google Drive' +
+            '</a>'
+          );
+        })
+        .withFailureHandler(function(erro) {
+          document.getElementById('loading').style.display = 'none';
+          document.querySelector('.btn-gerar').disabled = false;
+
+          mostrarErro(
+            erro.message || 'Ocorreu um erro ao gerar o termo.'
+          );
+        })
+        .gerarTermo(dados);
+    }
+
+    function mostrarSucesso(texto) {
+      const mensagem = document.getElementById('mensagem');
+      mensagem.innerHTML = texto;
+      mensagem.className = 'mensagem sucesso';
+    }
+
+    function mostrarErro(texto) {
+      const mensagem = document.getElementById('mensagem');
+      mensagem.innerHTML = texto;
+      mensagem.className = 'mensagem erro';
+    }
+
+    function limparMensagem() {
+      const mensagem = document.getElementById('mensagem');
+      mensagem.innerHTML = '';
+      mensagem.className = 'mensagem';
+    }
+
+    function limparFormulario() {
+      document.querySelectorAll('input:not([readonly]), textarea').forEach(function(input) {
+        input.value = '';
+      });
+
+      document.getElementById('cidade').value = 'Alvorada';
+      document.getElementById('estado').value = 'RS';
+      document.querySelector('input[value="sim"]').checked = true;
+
+      mostrarResponsavel();
+      limparMensagem();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      mostrarResponsavel();
+    });
+  </script>
+</body>
+</html>
